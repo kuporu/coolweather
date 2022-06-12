@@ -2,6 +2,7 @@ package com.hgc.coolweather;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -102,6 +103,31 @@ public class ChooseAreaFragment extends Fragment {
         listView = view.findViewById(R.id.list_view);
         adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, dataList);
         listView.setAdapter(adapter);
+
+        listView.setOnItemClickListener(((parent, view2, position, id) -> {
+            if (currentLevel == LEVEL_PROVINCE) {
+                selectedProvince = provinceList.get(position);
+                queryCities();
+            } else if (currentLevel == LEVEL_CITY) {
+                selectedCity = cityList.get(position);
+                queryCounties();
+            } else if (currentLevel == LEVEL_COUNTY) {
+                String weatherId = countyList.get(position).getWeatherId();
+                Intent intent = new Intent(getActivity(), WeatherActivity.class);
+                intent.putExtra("weather_id", weatherId);
+                startActivity(intent);
+                getActivity().finish();
+            }
+        }));
+        backButton.setOnClickListener((v) -> {
+            if (currentLevel == LEVEL_COUNTY) {
+                queryCities();
+            } else if (currentLevel == LEVEL_CITY) {
+                queryProvinces();
+            }
+        });
+        queryProvinces();
+
         return view;
     }
 
@@ -114,23 +140,29 @@ public class ChooseAreaFragment extends Fragment {
             public void onStateChanged(@NonNull LifecycleOwner source, @NonNull Lifecycle.Event event) {
                 if (event.getTargetState() == Lifecycle.State.CREATED) {
 
-                    listView.setOnItemClickListener(((parent, view, position, id) -> {
-                        if (currentLevel == LEVEL_PROVINCE) {
-                            selectedProvince = provinceList.get(position);
-                            queryCities();
-                        } else if (currentLevel == LEVEL_CITY) {
-                            selectedCity = cityList.get(position);
-                            queryCounties();
-                        }
-                    }));
-                    backButton.setOnClickListener((v) -> {
-                        if (currentLevel == LEVEL_COUNTY) {
-                            queryCities();
-                        } else if (currentLevel == LEVEL_CITY) {
-                            queryProvinces();
-                        }
-                    });
-                    queryProvinces();
+//                    listView.setOnItemClickListener(((parent, view, position, id) -> {
+//                        if (currentLevel == LEVEL_PROVINCE) {
+//                            selectedProvince = provinceList.get(position);
+//                            queryCities();
+//                        } else if (currentLevel == LEVEL_CITY) {
+//                            selectedCity = cityList.get(position);
+//                            queryCounties();
+//                        } else if (currentLevel == LEVEL_COUNTY) {
+//                            String weatherId = countyList.get(position).getWeatherId();
+//                            Intent intent = new Intent(getActivity(), WeatherActivity.class);
+//                            intent.putExtra("weather_id", weatherId);
+//                            startActivity(intent);
+//                            getActivity().finish();
+//                        }
+//                    }));
+//                    backButton.setOnClickListener((v) -> {
+//                        if (currentLevel == LEVEL_COUNTY) {
+//                            queryCities();
+//                        } else if (currentLevel == LEVEL_CITY) {
+//                            queryProvinces();
+//                        }
+//                    });
+//                    queryProvinces();
 
                     getLifecycle().removeObserver(this);
                 }
