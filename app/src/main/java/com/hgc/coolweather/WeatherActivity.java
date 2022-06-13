@@ -2,8 +2,11 @@ package com.hgc.coolweather;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -11,6 +14,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListAdapter;
@@ -22,6 +27,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.hgc.coolweather.gson.Forecast;
 import com.hgc.coolweather.gson.Weather;
+import com.hgc.coolweather.service.AutoUpdateService;
 import com.hgc.coolweather.util.HttpUtil;
 import com.hgc.coolweather.util.Utility;
 
@@ -47,8 +53,6 @@ public class WeatherActivity extends AppCompatActivity {
 
     private LinearLayout forecastLayout;
 
-//    private ListView forecastListView;
-
     private TextView aqiText;
 
     private TextView pm25Text;
@@ -63,6 +67,12 @@ public class WeatherActivity extends AppCompatActivity {
 
     public SwipeRefreshLayout swipeRefreshLayout;
 
+    private Button navBtn;
+
+    private String weatherId;
+
+    DrawerLayout drawerLayout;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -75,7 +85,6 @@ public class WeatherActivity extends AppCompatActivity {
         degreeText = findViewById(R.id.degree_text);
         weatherInfoText = findViewById(R.id.weather_info_text);
         forecastLayout = findViewById(R.id.forecast_layout);
-//        forecastListView = findViewById(R.id.forecast_list);
         aqiText = findViewById(R.id.aqi_text);
         pm25Text = findViewById(R.id.pm25_text);
         comfortText = findViewById(R.id.comfort_text);
@@ -83,10 +92,15 @@ public class WeatherActivity extends AppCompatActivity {
         sportText = findViewById(R.id.sport_text);
         bingPicImg = findViewById(R.id.bing_pic_img);
         swipeRefreshLayout = findViewById(R.id.swipe_refresh);
+        navBtn = findViewById(R.id.nav_button);
+        drawerLayout = findViewById(R.id.drawer_layout);
 
+        /*
+        显示天气信息
+         */
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         String weatherString = prefs.getString("weather", null);
-        final String weatherId;
+
         if (weatherString != null) {
             // 有缓存时直接解析天气数据
             Weather weather = Utility.handleWeatherResponse(weatherString);
@@ -99,6 +113,9 @@ public class WeatherActivity extends AppCompatActivity {
             requestWeather(weatherId);
         }
 
+        /*
+        加载每日一图
+         */
         String bingPic = prefs.getString("bing_pic", null);
         if (bingPic != null) {
             // 有缓存时直接在布局中加载图片
@@ -108,8 +125,18 @@ public class WeatherActivity extends AppCompatActivity {
             loadBingPic();
         }
 
+        /*
+        下拉刷新
+         */
         swipeRefreshLayout.setOnRefreshListener(() -> {
             requestWeather(weatherId);
+        });
+
+        /*
+        点击图标侧面显示省市县
+         */
+        navBtn.setOnClickListener((v) -> {
+            drawerLayout.openDrawer(GravityCompat.START);
         });
     }
 
@@ -127,9 +154,9 @@ public class WeatherActivity extends AppCompatActivity {
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 final String bingPic = response.body().string();
-                SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(WeatherActivity.this).edit();
-                editor.putString("bing_pic", bingPic);
-                editor.apply();
+//                SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(WeatherActivity.this).edit();
+//                editor.putString("bing_pic", bingPic);
+//                editor.apply();
                 runOnUiThread(() -> {
                     Glide.with(WeatherActivity.this).load(bingPic).into(bingPicImg);
                 });
@@ -139,9 +166,11 @@ public class WeatherActivity extends AppCompatActivity {
 
     /**
      * 根据天气id请求城市天气信息
+     * SharedPreference缓存信息覆盖更新
      * @param weatherId
      */
     public void requestWeather(final String weatherId) {
+        this.weatherId = weatherId;
 
         String weatherUrl = "http://guolin.tech/api/weather?cityid=" + weatherId + "&key=\t\n" +
                 "cd12d52859054988abc3c77242646c7e";
@@ -217,6 +246,10 @@ public class WeatherActivity extends AppCompatActivity {
         carWashText.setText(carWash);
         sportText.setText(sport);
         weatherLayout.setVisibility(View.VISIBLE);
+
+        // 启动后台更新服务
+        Intent intent = new Intent(this, AutoUpdateService.class);
+        startService(intent);
     }
 
 }
