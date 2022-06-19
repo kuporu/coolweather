@@ -97,7 +97,13 @@ public class ChooseAreaFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.choose_area, container, false);
+        return inflater.inflate(R.layout.choose_area, container, false);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
         titleText = view.findViewById(R.id.title_text);
         backButton = view.findViewById(R.id.back_button);
         listView = view.findViewById(R.id.list_view);
@@ -130,6 +136,7 @@ public class ChooseAreaFragment extends Fragment {
                 }
             }
         }));
+
         backButton.setOnClickListener((v) -> {
             if (currentLevel == LEVEL_COUNTY) {
                 queryCities();
@@ -137,48 +144,8 @@ public class ChooseAreaFragment extends Fragment {
                 queryProvinces();
             }
         });
+
         queryProvinces();
-
-        return view;
-    }
-
-    @Override
-    public void onAttach(@NonNull Context context) {
-        super.onAttach(context);
-
-        requireActivity().getLifecycle().addObserver(new LifecycleEventObserver() {
-            @Override
-            public void onStateChanged(@NonNull LifecycleOwner source, @NonNull Lifecycle.Event event) {
-                if (event.getTargetState() == Lifecycle.State.CREATED) {
-
-//                    listView.setOnItemClickListener(((parent, view, position, id) -> {
-//                        if (currentLevel == LEVEL_PROVINCE) {
-//                            selectedProvince = provinceList.get(position);
-//                            queryCities();
-//                        } else if (currentLevel == LEVEL_CITY) {
-//                            selectedCity = cityList.get(position);
-//                            queryCounties();
-//                        } else if (currentLevel == LEVEL_COUNTY) {
-//                            String weatherId = countyList.get(position).getWeatherId();
-//                            Intent intent = new Intent(getActivity(), WeatherActivity.class);
-//                            intent.putExtra("weather_id", weatherId);
-//                            startActivity(intent);
-//                            getActivity().finish();
-//                        }
-//                    }));
-//                    backButton.setOnClickListener((v) -> {
-//                        if (currentLevel == LEVEL_COUNTY) {
-//                            queryCities();
-//                        } else if (currentLevel == LEVEL_CITY) {
-//                            queryProvinces();
-//                        }
-//                    });
-//                    queryProvinces();
-
-                    getLifecycle().removeObserver(this);
-                }
-            }
-        });
     }
 
     /**
