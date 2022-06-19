@@ -102,6 +102,11 @@ public class Utility {
         return false;
     }
 
+    /**
+     * 将 json 数据 解析为 weather 对象
+     * @param response
+     * @return
+     */
     public static Weather handleWeatherResponse(String response){
         try {
             JSONObject jsonObject = new JSONObject(response);

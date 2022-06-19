@@ -90,7 +90,7 @@ public class ChooseAreaFragment extends Fragment {
     private City selectedCity;
 
     /**
-     * 当前选中的级别
+     * "当前"选中的级别
      */
     private int currentLevel;
 
@@ -132,7 +132,7 @@ public class ChooseAreaFragment extends Fragment {
                 } else if (getActivity() instanceof WeatherActivity) {
                     WeatherActivity weatherActivity = (WeatherActivity) getActivity();
                     weatherActivity.drawerLayout.closeDrawers();
-                    weatherActivity.requestWeather(weatherId);
+                    weatherActivity.requestWeather(weatherId, false);
                 }
             }
         }));

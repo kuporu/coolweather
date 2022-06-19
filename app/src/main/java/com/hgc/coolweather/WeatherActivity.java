@@ -110,11 +110,13 @@ public class WeatherActivity extends AppCompatActivity {
             // 无缓存时去服务器查询天气
             weatherId = getIntent().getStringExtra("weather_id");
             weatherLayout.setVisibility(View.INVISIBLE);
-            requestWeather(weatherId);
+            requestWeather(weatherId, false);
         }
 
         /*
         加载每日一图
+        每日一图获取的图片是必应的每日一图，图片的更新在第一次加载图片或定时后台任务中
+        其余情况下加载缓存中的图片
          */
         String bingPic = prefs.getString("bing_pic", null);
         if (bingPic != null) {
@@ -125,11 +127,12 @@ public class WeatherActivity extends AppCompatActivity {
             loadBingPic();
         }
 
+
         /*
         下拉刷新
          */
         swipeRefreshLayout.setOnRefreshListener(() -> {
-            requestWeather(weatherId);
+            requestWeather(weatherId, true);
         });
 
         /*
@@ -141,7 +144,7 @@ public class WeatherActivity extends AppCompatActivity {
     }
 
     /**
-     * 加载必应每日一图
+     * 加载必应每日一图，并添加进缓存
      */
     private void loadBingPic() {
         String requestBingPic = "http://guolin.tech/api/bing_pic";
@@ -154,9 +157,9 @@ public class WeatherActivity extends AppCompatActivity {
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 final String bingPic = response.body().string();
-//                SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(WeatherActivity.this).edit();
-//                editor.putString("bing_pic", bingPic);
-//                editor.apply();
+                SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(WeatherActivity.this).edit();
+                editor.putString("bing_pic", bingPic);
+                editor.apply();
                 runOnUiThread(() -> {
                     Glide.with(WeatherActivity.this).load(bingPic).into(bingPicImg);
                 });
@@ -169,7 +172,7 @@ public class WeatherActivity extends AppCompatActivity {
      * SharedPreference缓存信息覆盖更新
      * @param weatherId
      */
-    public void requestWeather(final String weatherId) {
+    public void requestWeather(final String weatherId, boolean requestPic) {
         this.weatherId = weatherId;
 
         String weatherUrl = "http://guolin.tech/api/weather?cityid=" + weatherId + "&key=\t\n" +
@@ -200,6 +203,13 @@ public class WeatherActivity extends AppCompatActivity {
                 });
             }
         });
+
+        /*
+        更新每日一图
+         */
+        if (requestPic) {
+            loadBingPic();
+        }
     }
 
     /**
