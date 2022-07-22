@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">酷欧天气</string>
+    <string name="remote_host">http://guolin.tech/</string>
+    <string name="self_local_dev_host">http://10.0.2.2:8081/</string>
+    <string name="self_remote_pro_host">http://1.117.219.117:8088/</string>
+    <string name="HOST">http://1.117.219.117:8091/user/login</string>
+    <string name="setWeatherIdUrl">http://1.117.219.117:8091/source/setWeatherId</string>
+    <string name="getWeatherIdUrl">http://1.117.219.117:8091/source/getWeatherId</string>
+    <string name="register_url">http://1.117.219.117:8091/user/register</string>
+</resources>
