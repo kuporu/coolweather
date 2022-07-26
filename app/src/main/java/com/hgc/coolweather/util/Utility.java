@@ -7,6 +7,7 @@ import com.google.gson.Gson;
 import com.hgc.coolweather.db.City;
 import com.hgc.coolweather.db.County;
 import com.hgc.coolweather.db.Province;
+import com.hgc.coolweather.enums.ResultCode;
 import com.hgc.coolweather.gson.Weather;
 
 import org.json.JSONArray;
@@ -29,7 +30,7 @@ public class Utility {
         if (!TextUtils.isEmpty(response)) {
             try {
                 JSONObject jsonObject = new JSONObject(response);
-                if (jsonObject.getInt("code") == 200) {
+                if (jsonObject.getInt("code") == ResultCode.SUCCESS.getCode()) {
                     JSONArray allProvinces = new JSONArray(jsonObject.getString("data"));
                     for (int i = 0; i < allProvinces.length(); i++) {
                         JSONObject provinceObject = allProvinces.getJSONObject(i);
@@ -61,7 +62,7 @@ public class Utility {
         if (!TextUtils.isEmpty(response)) {
             try {
                 JSONObject jsonObject = new JSONObject(response);
-                if (jsonObject.getInt("code")==200) {
+                if (jsonObject.getInt("code") == ResultCode.SUCCESS.getCode()) {
                     JSONArray allCities = new JSONArray(jsonObject.getString("data"));
                     for (int i = 0; i < allCities.length(); i++) {
                         JSONObject cityObject = allCities.getJSONObject(i);
@@ -95,7 +96,7 @@ public class Utility {
         if (!TextUtils.isEmpty((response))) {
             try {
                 JSONObject jsonObject = new JSONObject(response);
-                if (jsonObject.getInt("code") == 200) {
+                if (jsonObject.getInt("code") == ResultCode.SUCCESS.getCode()) {
                     JSONArray allCounties = new JSONArray(jsonObject.getString("data"));
                     for (int i = 0; i < allCounties.length(); i++) {
                         JSONObject countyObject = allCounties.getJSONObject(i);

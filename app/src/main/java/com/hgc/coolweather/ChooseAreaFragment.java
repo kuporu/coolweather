@@ -30,10 +30,13 @@ import com.hgc.coolweather.db.City;
 import com.hgc.coolweather.db.County;
 import com.hgc.coolweather.db.Province;
 import com.hgc.coolweather.entity.Source;
+import com.hgc.coolweather.enums.ResultCode;
 import com.hgc.coolweather.util.HttpUtil;
 import com.hgc.coolweather.util.SharePreferenceUtil;
 import com.hgc.coolweather.util.Utility;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.litepal.LitePal;
 
 import java.io.IOException;
@@ -68,7 +71,6 @@ public class ChooseAreaFragment extends Fragment {
 
     private Button titleLogout;
 
-//    private ListView listView;
     private RecyclerView recyclerView;
 
     private CustomAdapter adapter;
@@ -107,6 +109,8 @@ public class ChooseAreaFragment extends Fragment {
 
     private String setWeatherIdUrl;
 
+    private String logout;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -122,40 +126,7 @@ public class ChooseAreaFragment extends Fragment {
         titleLogout = view.findViewById(R.id.title_logout);
         host = getString(R.string.self_remote_pro_host);
         setWeatherIdUrl = getString(R.string.setWeatherIdUrl);
-
-        // 使用 listView(deprecated)
-//        listView = view.findViewById(R.id.list_view);
-//        adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, dataList);
-//        listView.setAdapter(adapter);
-//
-//        listView.setOnItemClickListener(((parent, view2, position, id) -> {
-//            if (currentLevel == LEVEL_PROVINCE) {
-//                selectedProvince = provinceList.get(position);
-//                queryCities();
-//            } else if (currentLevel == LEVEL_CITY) {
-//                selectedCity = cityList.get(position);
-//                queryCounties();
-//            } else if (currentLevel == LEVEL_COUNTY) {
-//                String weatherId = countyList.get(position).getWeatherId();
-//
-//                /*
-//                判断是通过MainActivity加载的fragment
-//                还是WeatherActivity加载的
-//                 */
-//                if (getActivity() instanceof MainActivity) {
-//                    Intent intent = new Intent(getActivity(), WeatherActivity.class);
-//                    intent.putExtra("weather_id", weatherId);
-//                    startActivity(intent);
-//                    getActivity().finish();
-//                } else if (getActivity() instanceof WeatherActivity) {
-//                    WeatherActivity weatherActivity = (WeatherActivity) getActivity();
-//                    weatherActivity.drawerLayout.closeDrawers();
-//                    weatherActivity.requestWeather(weatherId, false);
-//                }
-//            }
-//        }));
-
-        // 使用RecyclerView
+        logout = getString(R.string.LOGOUT);
         recyclerView = view.findViewById(R.id.recycler_view);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
         adapter = new CustomAdapter(dataList, new CustomAdapter.OnItemClickListener() {
@@ -217,11 +188,46 @@ public class ChooseAreaFragment extends Fragment {
             }
         });
 
+        /**
+         * 退出登录
+         */
         titleLogout.setOnClickListener((v) -> {
-            SharePreferenceUtil.clearSharePref(SharePreferenceUtil.IS_LOGIN, getContext());
-            Toast.makeText(getContext(), "退出登录", Toast.LENGTH_SHORT).show();
-            getActivity().finish();
-            startActivity(new Intent(getContext(), LoginActivity.class));
+            // 后端也需要调用退出
+            HttpUtil.sendHeadOkHttpRequest(logout, SharePreferenceUtil.getToken(SharePreferenceUtil.TOKEN, getContext()), new Callback() {
+                @Override
+                public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                    getActivity().runOnUiThread(() -> Toast.makeText(getContext(), "退出登录异常", Toast.LENGTH_LONG).show());
+                }
+
+                @Override
+                public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                    if (response.code() != 200 || response.body() == null) {
+                        getActivity().runOnUiThread(() -> Toast.makeText(getContext(), "服务器端响应异常", Toast.LENGTH_LONG).show());
+                    } else {
+                        try {
+                            JSONObject jsonObject = new JSONObject(response.body().string());
+                            if (jsonObject.getInt("code") == ResultCode.SUCCESS.getCode()) {
+                                SharePreferenceUtil.clearSharePref(SharePreferenceUtil.IS_LOGIN, getContext());
+                                getActivity().runOnUiThread(() -> Toast.makeText(getContext(), "退出登录", Toast.LENGTH_SHORT).show());
+                                getActivity().finish();
+                                startActivity(new Intent(getContext(), LoginActivity.class));
+                            } else {
+                                getActivity().runOnUiThread(() -> {
+                                    try {
+                                        Toast.makeText(getContext(), jsonObject.getString("msg"), Toast.LENGTH_SHORT).show();
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
+                                });
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
+                    }
+                }
+            });
+
         });
 
         queryProvinces();

@@ -16,21 +16,23 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent" >
-    <EditText
-        android:layout_above="@id/addUserPassword"
-        android:id="@+id/addUserName"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="用户名"
-        android:textSize="26sp" />
-    <EditText
-        android:id="@+id/addUserPassword"
-        android:layout_above="@id/register"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="用户密码"
-        android:inputType="textPassword"
-        android:textSize="26sp"/>
+
+        <EditText
+            android:id="@+id/addUserName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@id/addUserPassword"
+            android:hint="用户名"
+            android:textSize="26sp" />
+
+        <EditText
+            android:id="@+id/addUserPassword"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@id/register"
+            android:hint="用户密码"
+            android:inputType="textPassword"
+            android:textSize="26sp"/>
     <Button
         android:layout_alignParentBottom="true"
         android:id="@+id/register"

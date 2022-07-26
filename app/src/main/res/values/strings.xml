@@ -1,10 +1,20 @@
 <resources>
     <string name="app_name">酷欧天气</string>
     <string name="remote_host">http://guolin.tech/</string>
+    <!--获取城市接口(dev)-->
     <string name="self_local_dev_host">http://10.0.2.2:8081/</string>
+    <!--获取城市接口(pro)-->
     <string name="self_remote_pro_host">http://1.117.219.117:8088/</string>
+    <!--登录、登出，设置、获取weather接口（pro）-->
     <string name="HOST">http://1.117.219.117:8091/user/login</string>
+    <string name="LOGOUT">http://1.117.219.117:8091/user/logout</string>
     <string name="setWeatherIdUrl">http://1.117.219.117:8091/source/setWeatherId</string>
     <string name="getWeatherIdUrl">http://1.117.219.117:8091/source/getWeatherId</string>
     <string name="register_url">http://1.117.219.117:8091/user/register</string>
+    <!--登录、登出，设置、获取weather接口（dev）-->
+<!--    <string name="HOST">http://10.0.2.2:8080/user/login</string>-->
+<!--    <string name="LOGOUT">http://10.0.2.2:8080/user/logout</string>-->
+<!--    <string name="setWeatherIdUrl">http://10.0.2.2:8080/source/setWeatherId</string>-->
+<!--    <string name="getWeatherIdUrl">http://10.0.2.2:8080/source/getWeatherId</string>-->
+<!--    <string name="register_url">http://10.0.2.2:8080/user/register</string>-->
 </resources>

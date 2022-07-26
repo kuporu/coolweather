@@ -12,6 +12,7 @@ import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.hgc.coolweather.entity.User;
+import com.hgc.coolweather.enums.ResultCode;
 import com.hgc.coolweather.util.HttpUtil;
 
 import org.json.JSONException;
@@ -63,15 +64,18 @@ public class Register extends AppCompatActivity implements View.OnClickListener 
                 if (response.code() == 200) {
                     ResponseBody body = response.body();
                     if (!Objects.isNull(body)) {
+                        String bodyString = body.string();
                         try {
-                            JSONObject object = new JSONObject(body.string());
-                            if (object.getInt("code") == 200) {
+                            JSONObject object = new JSONObject(bodyString);
+                            if (object.getInt("code") == ResultCode.SUCCESS.getCode()) {
                                 runOnUiThread(() -> Toast.makeText(Register.this, "注册成功", Toast.LENGTH_LONG).show());
 
                                 finish();
                                 startActivity(new Intent(Register.this, LoginActivity.class));
                             } else {
-                                runOnUiThread(() -> Toast.makeText(Register.this, "用户名已存在", Toast.LENGTH_LONG).show());
+                                JSONObject jsonObject = new JSONObject(bodyString);
+                                String data = jsonObject.getString("data");
+                                runOnUiThread(() -> Toast.makeText(Register.this, data, Toast.LENGTH_LONG).show());
                             }
                         } catch (JSONException e) {
                             e.printStackTrace();

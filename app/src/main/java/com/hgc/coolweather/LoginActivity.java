@@ -11,6 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.gson.Gson;
 import com.hgc.coolweather.entity.User;
+import com.hgc.coolweather.enums.ResultCode;
 import com.hgc.coolweather.util.HttpUtil;
 import com.hgc.coolweather.util.SharePreferenceUtil;
 
@@ -65,14 +66,24 @@ public class LoginActivity extends AppCompatActivity {
                 int code = response.code();
                 ResponseBody body = response.body();
                 if (Objects.isNull(body) || code != 200) {
-                    runOnUiThread(() -> Toast.makeText(LoginActivity.this, "账号密码错误请重试", Toast.LENGTH_SHORT).show());
+                    runOnUiThread(() -> Toast.makeText(LoginActivity.this, "登录异常", Toast.LENGTH_SHORT).show());
 
                 } else {
+                    // 显示服务器返回的异常结果
+                    String bodyString = body.string();
+                    try {
+                        JSONObject object = new JSONObject(bodyString);
+                        if (ResultCode.SUCCESS.getCode() != object.getInt("code")) {
+                            String msg = object.getString("msg");
+                            runOnUiThread(() -> Toast.makeText(LoginActivity.this, msg, Toast.LENGTH_SHORT).show());
+                            return;
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                     SharePreferenceUtil.setBooleanSp(SharePreferenceUtil.IS_LOGIN, true, LoginActivity.this);
-                    runOnUiThread(() -> Toast.makeText(LoginActivity.this, "登陆成功", Toast.LENGTH_SHORT).show());
-                    parseJSON(body.string());
+                    parseJSON(bodyString);
                     finish();
-
                     // TODO: 2022/7/19 登录成功后返回当前界面（区分 Activity 和 Fragment）
                     if (Objects.isNull(intent.getSerializableExtra("skip"))) {
                         startActivity(new Intent(LoginActivity.this, MainActivity.class));

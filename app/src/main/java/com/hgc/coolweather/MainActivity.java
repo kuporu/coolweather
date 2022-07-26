@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.widget.Toast;
 
+import com.hgc.coolweather.enums.ResultCode;
 import com.hgc.coolweather.util.HttpUtil;
 import com.hgc.coolweather.util.SharePreferenceUtil;
 
@@ -29,8 +30,6 @@ import okhttp3.Response;
 public class MainActivity extends AppCompatActivity {
 
     private String getWeatherIdUrl;
-
-    public static final int REQUEST_EXTERNAL_RESTORE = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,13 +49,15 @@ public class MainActivity extends AppCompatActivity {
                 if (response.code() == 200 && !Objects.isNull(response.body())) {
                     try {
                         JSONObject jsonObject = new JSONObject(response.body().string());
-                        if (jsonObject.getInt("code") == 200) {
-                            String weatherId = jsonObject.getString("msg");
+                        if (jsonObject.getInt("code") == ResultCode.SUCCESS.getCode()) {
+                            String weatherId = jsonObject.getString("data");
                             Intent intent = new Intent(MainActivity.this, WeatherActivity.class);
                             intent.putExtra("weather_id", weatherId);
                             finish();
                             startActivity(intent);
-
+                        } else {
+                            String msg = jsonObject.getString("msg");
+                            runOnUiThread(() -> Toast.makeText(MainActivity.this, msg, Toast.LENGTH_LONG));
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -73,24 +74,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // TODO: 2022/7/20 动态获取写入文件权限
-        if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED) {
-            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_EXTERNAL_RESTORE);
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        switch (requestCode) {
-            case REQUEST_EXTERNAL_RESTORE:
-                if (grantResults.length > 0 && grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-                    Toast.makeText(this, "拒绝权限将无法访问", Toast.LENGTH_SHORT).show();
-                    finish();
-                }
-                break;
-            default:
-                break;
-        }
+        // TODO: 2022/7/25 解决日志记录问题
+//        throw new RuntimeException("查看日志是否记录成功");
     }
 }
